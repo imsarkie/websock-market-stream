@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Websock Market Stream</h2>
+
+<button onclick="send()">Send</button>
+
+<script>
+
+const socket = new WebSocket("ws://localhost:8080/ws");
+
+socket.onmessage = (event) => {
+    console.log("Server:", event.data);
+};
+
+socket.onopen = () => {
+    console.log("Connected");
+};
+
+function send() {
+    socket.send("Hello from Browser");
+}
+
+</script>
+
+</body>
+</html>
