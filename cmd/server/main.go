@@ -2,6 +2,7 @@ package main
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -50,12 +51,20 @@ func main(){
 			log.Fatal(err)
 		}
 
+		tradeJSON, err := json.Marshal(trade)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		
+		server.Broadcast(tradeJSON)
+
 		// fmt.Println(trade)
-		fmt.Printf(
-			"Symbol: %s | Price: %s | Quantity: %s\n",
-			trade.Symbol,
-			trade.Price,
-			trade.Quantity,
-		)
+		// fmt.Printf(
+		// 	"Symbol: %s | Price: %s | Quantity: %s\n",
+		// 	trade.Symbol,
+		// 	trade.Price,
+		// 	trade.Quantity,
+		// )
 	}
 }
