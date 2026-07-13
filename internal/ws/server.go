@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -77,12 +78,18 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request){
 }
 
 // Method Broadcast()
-func (s *Server) Broadcast(tradeVal []byte){
+func (s *Server) Broadcast(v any) error{
+
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
 	for client := range s.clients{
 		
 		err := client.WriteMessage(
 			websocket.TextMessage,
-			tradeVal,
+			data,
 		)
 		if err != nil {
 			log.Println(err)
@@ -90,4 +97,5 @@ func (s *Server) Broadcast(tradeVal []byte){
 			delete(s.clients, client)
 		}
 	}
+	return nil
 }

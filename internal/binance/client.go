@@ -29,15 +29,20 @@ func (c *Client) Connect() error{
 	return nil
 }
 
-func (c *Client) ReadTrade() (model.AggTrade, error){
+func (c *Client) ReadTrade() (model.Trade, error){
 	messageType, message, err := c.Conn.ReadMessage()
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Message Type: ", messageType)
 
-	var trade model.AggTrade
-	err = json.Unmarshal(message, &trade)
+	var agg model.AggTrade
+	err = json.Unmarshal(message, &agg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	trade, err := agg.ToTrade()
 	if err != nil {
 		log.Fatal(err)
 	}

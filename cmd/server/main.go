@@ -2,13 +2,14 @@ package main
 
 import (
 	// "encoding/json"
-	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/imsarkie/websock-market-stream/internal/binance"
+	"github.com/imsarkie/websock-market-stream/internal/candle"
+	"github.com/imsarkie/websock-market-stream/internal/pipeline"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
-	// "github.com/imsarkie/websock-market-stream/internal/model"
 )
 
 
@@ -25,8 +26,12 @@ func main(){
 	}
 
 	server := ws.NewServer()
+	engine := candle.New(10 * time.Second)
 
 	go server.Start()
+
+	pipe := pipeline.New(server, engine)
+
 
 	defer client.Conn.Close()
 	fmt.Println("Connected to Binance!")
@@ -46,18 +51,23 @@ func main(){
 		// }
 	
 		trade, err := client.ReadTrade()
-
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		tradeJSON, err := json.Marshal(trade)
+		// tradeJSON, err := json.Marshal(trade)
+		// if err != nil {
+		// 	log.Println(err)
+		// 	return
+		// }	
+		
+		// server.Broadcast(tradeJSON)
+
+		err = pipe.ProcessTrade(trade)
 		if err != nil {
 			log.Println(err)
-			return
 		}
-		
-		server.Broadcast(tradeJSON)
+
 
 		// fmt.Println(trade)
 		// fmt.Printf(
