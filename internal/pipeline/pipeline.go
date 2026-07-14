@@ -7,6 +7,7 @@ import (
 	"github.com/imsarkie/websock-market-stream/internal/candle"
 	"github.com/imsarkie/websock-market-stream/internal/history"
 	"github.com/imsarkie/websock-market-stream/internal/model"
+	"github.com/imsarkie/websock-market-stream/internal/mysql"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
 )
 
@@ -15,20 +16,24 @@ type Pipeline struct {
 	server *ws.Server
 	engine *candle.Engine
 	history *history.Store
+	mysql *mysql.Store
 }
 
 // Constructor
-func New(ws *ws.Server, engine *candle.Engine, history *history.Store) *Pipeline {
+func New(ws *ws.Server, engine *candle.Engine, history *history.Store, mysql *mysql.Store) *Pipeline {
 	return &Pipeline{
 		server: ws,
 		engine: engine,
 		history: history,
+		mysql: mysql,
 	}
 }
 
 func (p *Pipeline) broadcast(trade model.Trade) error {
 	return p.server.Broadcast(trade)
 }
+
+
 
 // ProcessTrade Method
 func (p *Pipeline) ProcessTrade(trade model.Trade) error {
@@ -41,6 +46,10 @@ func (p *Pipeline) ProcessTrade(trade model.Trade) error {
 
 	if completed {
 		fmt.Println("Candle Broadcast sent !!!")
+
+		if err := p.mysql.SaveCandle(*candle); err != nil {
+			return err
+		}
 
 		// Saving history in the hisotry
 		p.history.SaveCandle(*candle)

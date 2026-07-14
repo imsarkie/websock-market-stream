@@ -9,6 +9,9 @@ import (
 	"github.com/imsarkie/websock-market-stream/internal/binance"
 	"github.com/imsarkie/websock-market-stream/internal/candle"
 	"github.com/imsarkie/websock-market-stream/internal/history"
+	"github.com/imsarkie/websock-market-stream/internal/mysql"
+
+	// "github.com/imsarkie/websock-market-stream/internal/mysql"
 	"github.com/imsarkie/websock-market-stream/internal/pipeline"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
 )
@@ -24,16 +27,33 @@ func main() {
 		log.Fatal(err)
 	}
 
+	mysqlStore, err := mysql.NewStore(
+    	"root:2159@tcp(localhost:3306)/marketstream?parseTime=true",
+	)
+	if err != nil {
+    	log.Fatal(err)
+	}
+	defer mysqlStore.Close()
+
 	history := history.NewStore(500)
-	server := ws.NewServer(history)
+	server := ws.NewServer(history, mysqlStore)
 	engine := candle.New(30 * time.Second)
 
 	go server.Start()
+
+	// mysqlStore, err := mysql.NewStore(
+	// 	"root:2159@tcp(localhost:3306)/marketstream",
+	// )
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Print(mysqlStore)
 
 	pipe := pipeline.New(
 		server,
 		engine,
 		history,
+		mysqlStore,
 	)
 
 	defer client.Conn.Close()

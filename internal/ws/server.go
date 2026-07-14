@@ -4,21 +4,25 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 	"github.com/imsarkie/websock-market-stream/internal/history"
+	"github.com/imsarkie/websock-market-stream/internal/mysql"
 )
 
 type Server struct{
 	clients		map[*websocket.Conn]bool
 
 	history 	*history.Store
+	mysql		*mysql.Store
 }
 
-func NewServer(history *history.Store) (s *Server){
+func NewServer(history *history.Store, mysql *mysql.Store) (s *Server){
 	return &Server{
 		clients: make(map[*websocket.Conn]bool),
 		history: history,
+		mysql: mysql,
 	}
 }
 
@@ -28,6 +32,7 @@ func(s *Server) Start() error{
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", s.handleWS)
 	http.HandleFunc("/history", s.handleHistory)
+	http.HandleFunc("/candles", s.handleCandles)
 
 	return http.ListenAndServe(":8080", nil)
 }
@@ -121,4 +126,31 @@ func (s *Server) handleHistory(w http.ResponseWriter, r *http.Request){
 			http.StatusInternalServerError,
 		)
 	}
+}
+
+func (s *Server) handleCandles(w http.ResponseWriter, r *http.Request){
+	limitstr := r.URL.Query().Get("limit")
+	limit, err := strconv.Atoi(limitstr)
+	if err != nil {
+		http.Error(w, "invalid limit", http.StatusBadRequest)
+		return
+	}
+
+	candles, err := s.history.GetCandles(limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(candles) < limit {
+		dbCandles, err := s.mysql.GetCandles(limit)
+		if err != nil {
+			log.Println(err)
+		} else {
+			candles = dbCandles
+		}
+	}
+
+	w.Header().Set("content-type", "application/json")
+	json.NewEncoder(w).Encode(candles)
 }
