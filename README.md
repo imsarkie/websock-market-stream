@@ -1,6 +1,6 @@
 # Market Stream
 
-A real-time cryptocurrency market data engine written in Go. It connects to
+A real-time stock market (kinda) data engine written in Go. It connects to
 Binance's public WebSocket API, converts individual trade events into
 time-bucketed OHLC candles, broadcasts completed candles to connected
 browsers over WebSocket, persists them to MySQL, and renders them with
