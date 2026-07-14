@@ -1,0 +1,18 @@
+body{
+    margin:0;
+    padding:20px;
+
+    background:#1e1e1e;
+    color:white;
+
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+#chart{
+    width:1200px;
+    height:700px;
+}

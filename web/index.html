@@ -1,28 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Market Stream</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+
 <body>
 
-<h2>Websock Market Stream</h2>
+    <h1>WebSocket Market Stream</h1>
 
-<button onclick="send()">Send</button>
+    <div id="chart"></div>
 
-<script>
-
-const socket = new WebSocket("ws://localhost:8080/ws");
-
-socket.onmessage = (event) => {
-    console.log("Server:", event.data);
-};
-
-socket.onopen = () => {
-    console.log("Connected");
-};
-
-function send() {
-    socket.send("Hello from Browser");
-}
-
-</script>
+    <script src="/js/chart.js"></script>
+    <script src="/js/websocket.js"></script>
+    <script src="/js/app.js"></script>
 
 </body>
 </html>

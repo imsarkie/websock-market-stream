@@ -19,7 +19,9 @@ func NewServer() (s *Server){
 }
 
 func(s *Server) Start() error{
-	http.HandleFunc("/", s.home)
+	fs := http.FileServer(http.Dir("./web"))
+	// http.HandleFunc("/", s.home)
+	http.Handle("/", fs)
 	http.HandleFunc("/ws", s.handleWS)
 
 	return http.ListenAndServe(":8080", nil)
