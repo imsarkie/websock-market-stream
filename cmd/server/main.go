@@ -8,13 +8,12 @@ import (
 
 	"github.com/imsarkie/websock-market-stream/internal/binance"
 	"github.com/imsarkie/websock-market-stream/internal/candle"
+	"github.com/imsarkie/websock-market-stream/internal/history"
 	"github.com/imsarkie/websock-market-stream/internal/pipeline"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
 )
 
-
-
-func main(){
+func main() {
 	client := binance.NewClient(
 		"wss://stream.binance.com:9443/ws/bnbusdt@aggTrade",
 	)
@@ -25,13 +24,17 @@ func main(){
 		log.Fatal(err)
 	}
 
-	server := ws.NewServer()
-	engine := candle.New(10 * time.Second)
+	history := history.NewStore(500)
+	server := ws.NewServer(history)
+	engine := candle.New(30 * time.Second)
 
 	go server.Start()
 
-	pipe := pipeline.New(server, engine)
-
+	pipe := pipeline.New(
+		server,
+		engine,
+		history,
+	)
 
 	defer client.Conn.Close()
 	fmt.Println("Connected to Binance!")
@@ -41,15 +44,15 @@ func main(){
 		// if err != nil {
 		// 	log.Fatal(err)
 		// }
-	
+
 		// log.Println("Message Type: ", messageType)
 		// // log.Println("Message: ", string(message))
-	
+
 		// err = json.Unmarshal(message, &trade)
 		// if err != nil {
 		// 	log.Fatal(err)
 		// }
-	
+
 		trade, err := client.ReadTrade()
 		if err != nil {
 			log.Fatal(err)
@@ -59,15 +62,14 @@ func main(){
 		// if err != nil {
 		// 	log.Println(err)
 		// 	return
-		// }	
-		
+		// }
+
 		// server.Broadcast(tradeJSON)
 
 		err = pipe.ProcessTrade(trade)
 		if err != nil {
 			log.Println(err)
 		}
-
 
 		// fmt.Println(trade)
 		// fmt.Printf(

@@ -6,15 +6,19 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/imsarkie/websock-market-stream/internal/history"
 )
 
 type Server struct{
 	clients		map[*websocket.Conn]bool
+
+	history 	*history.Store
 }
 
-func NewServer() (s *Server){
+func NewServer(history *history.Store) (s *Server){
 	return &Server{
 		clients: make(map[*websocket.Conn]bool),
+		history: history,
 	}
 }
 
@@ -23,6 +27,7 @@ func(s *Server) Start() error{
 	// http.HandleFunc("/", s.home)
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", s.handleWS)
+	http.HandleFunc("/history", s.handleHistory)
 
 	return http.ListenAndServe(":8080", nil)
 }
@@ -100,4 +105,20 @@ func (s *Server) Broadcast(v any) error{
 		}
 	}
 	return nil
+}
+
+func (s *Server) handleHistory(w http.ResponseWriter, r *http.Request){
+
+	w.Header().Set("content-type", "application/json")
+
+	candles := s.history.GetAll()
+	
+	err := json.NewEncoder(w).Encode(candles)
+	if err != nil {
+		http.Error(
+			w,
+			"Failed to Encode.",
+			http.StatusInternalServerError,
+		)
+	}
 }

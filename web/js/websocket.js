@@ -28,3 +28,13 @@ function connectWebSocket(){
     };
 
 }
+
+async function loadHistoryFromServer() {
+    const response = await fetch("/history");
+
+    const candles = await response.json();
+
+    console.log(candles);
+
+    loadHistory(candles);
+}

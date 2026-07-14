@@ -2,8 +2,10 @@ package pipeline
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/imsarkie/websock-market-stream/internal/candle"
+	"github.com/imsarkie/websock-market-stream/internal/history"
 	"github.com/imsarkie/websock-market-stream/internal/model"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
 )
@@ -12,13 +14,15 @@ import (
 type Pipeline struct {
 	server *ws.Server
 	engine *candle.Engine
+	history *history.Store
 }
 
 // Constructor
-func New(ws *ws.Server, engine *candle.Engine) *Pipeline {
+func New(ws *ws.Server, engine *candle.Engine, history *history.Store) *Pipeline {
 	return &Pipeline{
 		server: ws,
 		engine: engine,
+		history: history,
 	}
 }
 
@@ -34,8 +38,15 @@ func (p *Pipeline) ProcessTrade(trade model.Trade) error {
 	// }
 
 	candle, completed := p.engine.Update(trade)
+
 	if completed {
 		fmt.Println("Candle Broadcast sent !!!")
+
+		// Saving history in the hisotry
+		p.history.SaveCandle(*candle)
+		log.Printf("History size: %d", len(p.history.GetAll()))
+
+		// Broadcast to the browser for chart.
 		p.server.Broadcast(candle)
 	}
 
