@@ -4,6 +4,7 @@ import "time"
 
 type Candle struct{
 	Symbol 		string
+	Timeframe 	string
 	
 	Open 		float64
 	High		float64
