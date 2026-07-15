@@ -2,7 +2,7 @@
 
 A real-time cryptocurrency market data engine built in Go.
 
-The application connects to Binance's WebSocket API, converts live trade events into OHLC candles, stores completed candles in MySQL, broadcasts them to connected clients over WebSocket, and visualizes them using TradingView Lightweight Charts. :contentReference[oaicite:0]{index=0}
+The application connects to Binance's WebSocket API, converts live trade events into OHLC candles, stores completed candles in MySQL, broadcasts them to connected clients over WebSocket, and visualizes them using TradingView Lightweight Charts. 
 
 ---
 
