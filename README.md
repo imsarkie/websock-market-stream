@@ -6,6 +6,18 @@ The application connects to Binance's WebSocket API, converts live trade events 
 
 ---
 
+## Project Status
+
+This is the **final state of the project**. It implements a single-timeframe
+pipeline end-to-end (ingestion → candle aggregation → persistence →
+broadcast → chart). A multi-timeframe engine was attempted and reverted in
+favor of this simpler, working version.
+
+Everything listed under [Not Implemented](#not-implemented) was scoped out
+and left for a future iteration — it is not part of this build.
+
+---
+
 ## Features
 
 - Live Binance WebSocket integration
@@ -149,31 +161,23 @@ http://localhost:8080
 
 ---
 
-## Current Capabilities
-
-- Live Binance trade ingestion
-- OHLC candle generation
-- Live chart updates
-- Historical candle API
-- MySQL persistence
-
----
-
-## Roadmap
-
-### Completed
+## Completed
 
 - Binance WebSocket Client
-- Candle Engine
+- Candle Engine (single timeframe)
 - Pipeline
 - WebSocket Server
 - Live Chart
 - History API
 - MySQL Storage
 
-### Next
+---
 
-- Multi-timeframe engine
+## Not Implemented
+
+These were considered but not built in this version:
+
+- Multi-timeframe engine (attempted, reverted — see [Project Status](#project-status))
 - Technical indicators (EMA, SMA, VWAP, RSI, MACD)
 - Symbol switching
 - Trader dashboard

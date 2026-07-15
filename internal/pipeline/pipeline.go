@@ -8,7 +8,6 @@ import (
 	"github.com/imsarkie/websock-market-stream/internal/history"
 	"github.com/imsarkie/websock-market-stream/internal/model"
 	"github.com/imsarkie/websock-market-stream/internal/mysql"
-	"github.com/imsarkie/websock-market-stream/internal/timeframe"
 	"github.com/imsarkie/websock-market-stream/internal/ws"
 )
 
@@ -18,17 +17,15 @@ type Pipeline struct {
 	engine *candle.Engine
 	history *history.Store
 	mysql *mysql.Store
-	manager *timeframe.Manager
 }
 
 // Constructor
-func New(ws *ws.Server, engine *candle.Engine, history *history.Store, mysql *mysql.Store, manager *timeframe.Manager) *Pipeline {
+func New(ws *ws.Server, engine *candle.Engine, history *history.Store, mysql *mysql.Store) *Pipeline {
 	return &Pipeline{
 		server: ws,
 		engine: engine,
 		history: history,
 		mysql: mysql,
-		manager: manager,
 	}
 }
 
@@ -47,33 +44,33 @@ func (p *Pipeline) ProcessTrade(trade model.Trade) error {
 
 	// ----------------- With single timeframe implementation -----------------//
 
-	// candle, completed := p.engine.Update(trade)
+	candle, completed := p.engine.Update(trade)
 
-	// if completed {
-	// 	fmt.Println("Candle Broadcast sent !!!")
+	if completed {
+		fmt.Println("Candle Broadcast sent !!!")
 
-	// 	if err := p.mysql.SaveCandle(*candle); err != nil {
-	// 		return err
-	// 	}
+		if err := p.mysql.SaveCandle(*candle); err != nil {
+			return err
+		}
 
-	// 	// Saving history in the hisotry
-	// 	p.history.SaveCandle(*candle)
-	// 	log.Printf("History size: %d", len(p.history.GetAll()))
-
-	// 	// Broadcast to the browser for chart.
-	// 	p.server.Broadcast(candle)
-	// }
-
-	// ----------------- With multiple timeframe implementation -----------------//
-
-	candles := p.manager.Update(trade)
-	for _, candle := range candles{
+		// Saving history in the hisotry
 		p.history.SaveCandle(*candle)
 		log.Printf("History size: %d", len(p.history.GetAll()))
 
+		// Broadcast to the browser for chart.
 		p.server.Broadcast(candle)
-		fmt.Println("Candle Broadcast sent !!!")
 	}
+
+	// ----------------- With multiple timeframe implementation -----------------//
+
+	// candles := p.engine.Update(trade)
+	// for _, candle := range candles{
+	// 	p.history.SaveCandle(*candle)
+	// 	log.Printf("History size: %d", len(p.history.GetAll()))
+
+	// 	p.server.Broadcast(candle)
+	// 	fmt.Println("Candle Broadcast sent !!!")
+	// }
 
 	return nil
 }

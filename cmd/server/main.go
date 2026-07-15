@@ -10,7 +10,6 @@ import (
 	"github.com/imsarkie/websock-market-stream/internal/candle"
 	"github.com/imsarkie/websock-market-stream/internal/history"
 	"github.com/imsarkie/websock-market-stream/internal/mysql"
-	"github.com/imsarkie/websock-market-stream/internal/timeframe"
 
 	// "github.com/imsarkie/websock-market-stream/internal/mysql"
 	"github.com/imsarkie/websock-market-stream/internal/pipeline"
@@ -39,12 +38,7 @@ func main() {
 	history := history.NewStore(500)
 	server := ws.NewServer(history, mysqlStore)
 	engine := candle.New(30 * time.Second)
-	manager := timeframe.New(
-		30*time.Second,
-    	time.Minute,
-    	2*time.Minute,
-		5*time.Minute,
-	)
+
 
 	go server.Start()
 
@@ -61,7 +55,6 @@ func main() {
 		engine,
 		history,
 		mysqlStore,
-		manager,
 	)
 
 	defer client.Conn.Close()
