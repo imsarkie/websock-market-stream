@@ -1,8 +1,12 @@
 # Market Stream
 
-A real-time cryptocurrency market data engine built in Go.
+A real-time market stream data engine built in Go.
 
 The application connects to Binance's WebSocket API, converts live trade events into OHLC candles, stores completed candles in MySQL, broadcasts them to connected clients over WebSocket, and visualizes them using TradingView Lightweight Charts. 
+
+---
+
+<img width="1710" height="958" alt="Screenshot 2026-07-15 at 8 48 52 PM" src="https://github.com/user-attachments/assets/dcda2c11-43bc-4f25-af97-675a80a43d00" />
 
 ---
 
